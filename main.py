@@ -4,7 +4,10 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse, StreamingResponse
 import os
 
+debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
+
 app = FastAPI()
+
 
 
 @app.get("/")
