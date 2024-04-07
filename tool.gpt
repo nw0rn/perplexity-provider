@@ -1,0 +1,5 @@
+Name: Perplexity Provider
+Description: Model provider for Perplexity host models
+Model Provider: true
+
+#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py
