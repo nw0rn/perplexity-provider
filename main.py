@@ -2,6 +2,7 @@ import json
 from typing import Union
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse, StreamingResponse
+import os
 
 app = FastAPI()
 
