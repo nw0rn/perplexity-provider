@@ -1,10 +1,8 @@
 import json
-from typing import Union
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 import os
 from openai import OpenAI
-import requests
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
@@ -12,12 +10,12 @@ app = FastAPI()
 
 url = "https://api.perplexity.ai/chat/completions"
 
-# if "PERPLEXITY_API_KEY" in os.environ:
-#     api_key = os.environ["PERPLEXITY_API_KEY"]
-# else:
-#     raise SystemExit("PERPLEXITY_API_KEY not found in environment variables")
+if "PERPLEXITY_API_KEY" in os.environ:
+    api_key = os.environ["PERPLEXITY_API_KEY"]
+else:
+    raise SystemExit("PERPLEXITY_API_KEY not found in environment variables")
 
-api_key = "123"
+client = OpenAI(api_key=api_key, base_url="https://api.perplexity.ai")
 
 @app.get("/")
 async def get_root():
@@ -35,39 +33,33 @@ async def list_models() -> JSONResponse:
 
 @app.post("/v1/chat/completions")
 async def completions(request: Request) -> StreamingResponse:
-    try:
-        payload = {
-            "model": "sonar-small-chat",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Be precise and concise. Only print maximum 5 words."
-                },
-                {
-                    "role": "user",
-                    "content": "How many stars are there in our galaxy?"
-                }
-            ]
-        }
+    data = await request.body()
+    data = json.loads(data)
+    print("Request: ", request)
+    print("Data: ", data)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Be precise and concise. Only print maximum 5 words."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                "How many stars are in the universe?"
+            ),
+        },
+    ]
+    
+    res = client.chat.completions.create(
+        model="sonar-small-chat",
+        messages=messages,
+        stream=True
+    )
 
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "Authorization": f"Bearer {api_key}"
-        }
-
-        response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError if the response code is not 2xx
-
-        print(response.text)
-        return StreamingResponse(content=response.text, media_type="application/json")
-
-    except requests.RequestException as e:
-        # Handles exceptions raised by the requests library
-        error_message = e.response.text if hasattr(e, "response") and e.response else str(e)
-        raise HTTPException(status_code=500, detail="Internal server error occurred. Error message: " + error_message + request)
-
-
+    return StreamingResponse(content=res, media_type="application/json")  
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
