@@ -3,6 +3,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 import os
 from openai import OpenAI
+from openai._streaming import Stream
+from openai.types.chat import ChatCompletionChunk
+from typing import AsyncIterable
 
 debug = os.environ.get("GPTSCRIPT_DEBUG", "false") == "true"
 
@@ -58,8 +61,13 @@ async def completions(request: Request) -> StreamingResponse:
         stream=True
     )
 
-    return StreamingResponse(content=res, media_type="application/json")  
-    
+    return StreamingResponse(convert_stream(res), media_type="application/x-ndjson")
+
+async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
+    for chunk in stream:
+        log("CHUNK: ", chunk.json())
+        yield "data: " + str(chunk.json()) + "\n\n"
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=int(os.environ.get("PORT", "8000")),
