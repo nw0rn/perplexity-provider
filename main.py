@@ -2,6 +2,7 @@ import json
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 import os
+import re
 from openai import OpenAI
 from openai._streaming import Stream
 from openai.types.chat import ChatCompletionChunk
