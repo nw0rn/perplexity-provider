@@ -20,6 +20,10 @@ else:
 
 client = OpenAI(api_key=api_key, base_url="https://api.perplexity.ai")
 
+def log(*args):
+    if debug:
+        print(*args)
+
 @app.get("/")
 async def get_root():
     return "ok"
@@ -38,22 +42,26 @@ async def list_models() -> JSONResponse:
 async def completions(request: Request) -> StreamingResponse:
     data = await request.body()
     data = json.loads(data)
-    print("Request: ", request)
-    print("Data: ", data)
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "Be precise and concise. Only print maximum 5 words."
-            ),
-        },
-        {
-            "role": "user",
-            "content": (
-                "How many stars are in the universe?"
-            ),
-        },
-    ]
+
+    try:
+        tools = data["tools"]
+    except Exception as e:
+        log("No tools provided: ", e)
+        tools = None
+
+    model = data["model"]
+
+    try:
+        messages = data["messages"]
+        for message in messages:
+            if 'content' in message.keys() and message["content"].startswith("[TOOL_CALLS] "):
+                message["content"] = ""
+
+            if 'tool_call_id' in message.keys():
+                message["name"] = re.sub(r'^call_(.*)_\d$', r'\1', message["tool_call_id"])
+    except Exception as e:
+        log("an error happened mapping tool_calls/tool_call_ids: ", e)
+        messages = None
     
     res = client.chat.completions.create(
         model="sonar-small-chat",
@@ -65,7 +73,7 @@ async def completions(request: Request) -> StreamingResponse:
 
 async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
     for chunk in stream:
-        print("CHUNK: ", chunk.json())
+        log("CHUNK: ", chunk.json())
         yield "data: " + str(chunk.json()) + "\n\n"
 
 if __name__ == "__main__":
