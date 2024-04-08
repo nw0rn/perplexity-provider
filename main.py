@@ -65,7 +65,7 @@ async def completions(request: Request) -> StreamingResponse:
 
 async def convert_stream(stream: Stream[ChatCompletionChunk]) -> AsyncIterable[str]:
     for chunk in stream:
-        log("CHUNK: ", chunk.json())
+        print("CHUNK: ", chunk.json())
         yield "data: " + str(chunk.json()) + "\n\n"
 
 if __name__ == "__main__":
