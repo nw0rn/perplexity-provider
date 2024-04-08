@@ -1,8 +1,6 @@
-import json
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 import os
-import re
 from openai import OpenAI
 from openai._streaming import Stream
 from openai.types.chat import ChatCompletionChunk
@@ -30,11 +28,16 @@ async def get_root():
 # The perplexity API does not have a method to list models, so we are hard coding the models here
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
-    return JSONResponse(content={"data": [
+    return JSONResponse(content={
+        "message": "List of models available in Perplexity as of 04/2024",
+        "data": [
         {"id": "sonar-small-chat", "name": "Perplexity Sonar Small Chat"},
         {"id": "sonar-small-online", "name": "Perplexity Sonar Small Online"},
         {"id": "sonar-medium-chat", "name": "Perplexity Sonar Medium Chat"},
-        {"id": "sonar-medium-online", "name": "Perplexity Sonar Medium Online"}
+        {"id": "sonar-medium-online", "name": "Perplexity Sonar Medium Online"},
+        {"id": "codellama-70b-instruct", "name": "Perplexity Code Llama 70B Instruct"},
+        {"id": "mistral-7b-instruct", "name": "Perplexity Mistral 7B Instruct v0.2"},
+        {"id": "mixtral-8x7b-instruct", "name": "Perplexity Mixtral 8x7B Instruct"},
     ]})
 
 @app.post("/v1/chat/completions")
