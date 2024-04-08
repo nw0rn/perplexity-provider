@@ -25,11 +25,10 @@ def log(*args):
 async def get_root():
     return "ok"
 
-# The perplexity API does not have a method to list models, so we are hard coding the models here
+# The perplexity API does not have a method to list models, so we are hard coding the models here - 04/2024
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     return JSONResponse(content={
-        "message": "List of models available in Perplexity as of 04/2024",
         "data": [
         {"id": "sonar-small-chat", "name": "Perplexity Sonar Small Chat"},
         {"id": "sonar-small-online", "name": "Perplexity Sonar Small Online"},
