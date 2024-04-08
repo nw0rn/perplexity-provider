@@ -12,10 +12,12 @@ app = FastAPI()
 
 url = "https://api.perplexity.ai/chat/completions"
 
-if "PERPLEXITY_API_KEY" in os.environ:
-    api_key = os.environ["PERPLEXITY_API_KEY"]
-else:
-    raise SystemExit("PERPLEXITY_API_KEY not found in environment variables")
+# if "PERPLEXITY_API_KEY" in os.environ:
+#     api_key = os.environ["PERPLEXITY_API_KEY"]
+# else:
+#     raise SystemExit("PERPLEXITY_API_KEY not found in environment variables")
+
+api_key = "123"
 
 @app.get("/")
 async def get_root():
