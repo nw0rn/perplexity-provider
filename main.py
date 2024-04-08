@@ -25,7 +25,7 @@ def log(*args):
 async def get_root():
     return "ok"
 
-# The perplexity API does not have a method to list models, so we are hard coding the models here - 04/2024
+# The perplexity API does not have a method to list models, so we are hard coding the models here - 04/2024 - https://docs.perplexity.ai/docs/model-cards
 @app.get("/v1/models")
 async def list_models() -> JSONResponse:
     return JSONResponse(content={
